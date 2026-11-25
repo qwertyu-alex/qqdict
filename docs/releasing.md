@@ -8,11 +8,11 @@ Releases contain separate Apple Silicon (`arm64`) and Intel (`x64`) builds. The 
 
 ## Release files
 
-Use Node.js 22.12 or later, pnpm 10.9.0, and Xcode Command Line Tools on a Mac. The installer builder produces versioned DMG and ZIP files in `release/`, plus a SHA-256 manifest and signing metadata for that architecture. For version 0.5.6:
+Use Node.js 22.12 or later, pnpm 10.9.0, and Xcode Command Line Tools on a Mac. The installer builder produces versioned DMG and ZIP files in `release/`, plus a SHA-256 manifest and signing metadata for that architecture. For version 0.5.7:
 
 ```text
-qqdict-0.5.6-mac-arm64.dmg
-qqdict-0.5.6-mac-arm64.zip
+qqdict-0.5.7-mac-arm64.dmg
+qqdict-0.5.7-mac-arm64.zip
 SHA256SUMS-arm64.txt
 release-metadata-arm64.json
 ```
@@ -60,14 +60,14 @@ Confirm the result before publishing a notarized stable release:
 codesign --verify --deep --strict release/qqdict.app
 xcrun stapler validate release/qqdict.app
 spctl --assess --type execute release/qqdict.app
-xcrun stapler validate release/qqdict-0.5.6-mac-arm64.dmg
+xcrun stapler validate release/qqdict-0.5.7-mac-arm64.dmg
 ```
 
 Use the appropriate version and architecture in the DMG path. Inspect each `release-metadata-{arch}.json`: `signing` and `diskImageSigning` must both be `developer-id`, and `notarized` and `diskImageNotarized` must both be `true`. A successful build or certificate alone is not evidence of notarization.
 
 ## GitHub release workflow
 
-The workflow runs tests and builds on macOS runners for both architectures when a `v*` tag is pushed. It sets `QQDICT_CHANNEL=production` to retain the production app name, bundle identifier, and artifact filenames. Local builds default to `nightly`; use `QQDICT_CHANNEL=production` explicitly when building production releases locally, regardless of signing credentials. Keep `package.json`, the lockfile, and the tag version consistent. Use a `v` prefix with the package version, for example `v0.5.6`.
+The workflow runs tests and builds on macOS runners for both architectures when a `v*` tag is pushed. It sets `QQDICT_CHANNEL=production` to retain the production app name, bundle identifier, and artifact filenames. Local builds default to `nightly`; use `QQDICT_CHANNEL=production` explicitly when building production releases locally, regardless of signing credentials. Keep `package.json`, the lockfile, and the tag version consistent. Use a `v` prefix with the package version, for example `v0.5.7`.
 
 The local Keychain profile is available only on your Mac. GitHub Actions needs its own certificate import and notarization configuration. Export the Developer ID Application certificate **and private key** together as a password-protected `.p12`, then configure all six repository Actions secrets:
 
@@ -82,7 +82,7 @@ The local Keychain profile is available only on your Mac. GitHub Actions needs i
 
 Do not commit the `.p12`, its Base64 contents, or any password. The workflow imports the certificate into a temporary signing Keychain and removes that Keychain after the build. The app-specific password is passed through Actions secrets; it is not the password for your Apple account.
 
-The workflow publishes versioned assets and signing metadata. Check both jobs and inspect the downloadable assets before announcing the release. Unnotarized builds are prereleases. The README links directly to `v0.5.6`; update its versioned links for each release. GitHub’s `/releases/latest` link skips prereleases and can be used for stable notarized releases.
+The workflow publishes versioned assets and signing metadata. Check both jobs and inspect the downloadable assets before announcing the release. Unnotarized builds are prereleases. The README links directly to `v0.5.7`; update its versioned links for each release. GitHub’s `/releases/latest` link skips prereleases and can be used for stable notarized releases.
 
 Production builds now include [automatic updates](automatic-updates.md). New releases remain drafts until all assets have uploaded, and published stable assets are preserved on workflow reruns. Always use a new version and tag for a correction. Keep both architecture ZIPs, the production bundle ID, and the Developer ID signing team consistent so installed apps can update. Inspect `qqdict.app/Contents/Resources/update-config.json`: `enabled` must be `true` in a notarized production release. Source, Nightly, and unnotarized builds leave updates disabled.
 

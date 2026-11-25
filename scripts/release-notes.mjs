@@ -34,7 +34,7 @@ else lines.push(
 );
 lines.push(
   'Uses your existing local Codex sign-in. No API key is required. The current transcription connection uses an internal OpenAI endpoint and may change; qqdict is an independent project.', '',
-  'Microphone, Accessibility, and Input Monitoring access are requested during Setup. Audio is sent to OpenAI for transcription; transcripts are stored on your Mac in `~/Dictation`.', '',
+  'Microphone, Accessibility, and Input Monitoring access are requested during Setup. Audio is sent to OpenAI for transcription; each take’s audio is kept on your Mac for 24 hours so a failed transcription can be retried, and transcripts are stored in `~/Dictation`.', '',
   'The attached ZIP files are an alternative to the DMG installers. SHA-256 checksum files and release metadata are included for both architectures.', '',
   '[Usage, privacy, and source build instructions](https://github.com/qwertyu-alex/qqdict#readme)', '',
 );

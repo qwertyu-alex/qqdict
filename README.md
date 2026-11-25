@@ -6,9 +6,9 @@ Hold a key. Say it. Keep writing.
 
 qqdict is a small macOS menu bar app that turns your voice into text and pastes it into the field you’re using. It uses your existing Codex sign-in.
 
-**[Download qqdict for Mac →](https://github.com/qwertyu-alex/qqdict/releases/tag/v0.5.6)**
+**[Download qqdict for Mac →](https://github.com/qwertyu-alex/qqdict/releases/tag/v0.5.7)**
 
-[Apple Silicon](https://github.com/qwertyu-alex/qqdict/releases/download/v0.5.6/qqdict-0.5.6-mac-arm64.dmg) · [Intel](https://github.com/qwertyu-alex/qqdict/releases/download/v0.5.6/qqdict-0.5.6-mac-x64.dmg) · [All releases](https://github.com/qwertyu-alex/qqdict/releases)
+[Apple Silicon](https://github.com/qwertyu-alex/qqdict/releases/download/v0.5.7/qqdict-0.5.7-mac-arm64.dmg) · [Intel](https://github.com/qwertyu-alex/qqdict/releases/download/v0.5.7/qqdict-0.5.7-mac-x64.dmg) · [All releases](https://github.com/qwertyu-alex/qqdict/releases)
 
 Choose **Apple Silicon** (`arm64`) for an M-series Mac or **Intel** (`x64`) for an Intel Mac. Requires **macOS 13 or later**, a microphone, internet access, and a compatible Codex installation signed in with ChatGPT.
 
@@ -37,7 +37,7 @@ Interface previews with example transcripts. Click any image to view it at full 
 
 macOS may ask you to confirm opening an app downloaded from the internet on first launch. qqdict lives in the menu bar; its window can be closed while dictation stays available.
 
-Production builds with the automatic updater check for new stable releases and download them in the background. Choose **Restart now** when ready, or **Later** to update at the next app launch. Right-click the menu bar icon for **Check for updates…**. Downloads of **0.5.5** and earlier predate this feature and need one manual upgrade to **0.5.6**, the first release containing it. See [automatic updates and first-release setup](docs/automatic-updates.md).
+Production builds with the automatic updater check for new stable releases and download them in the background. Choose **Restart now** when ready, or **Later** to update at the next app launch. Right-click the menu bar icon for **Check for updates…**. Downloads of **0.5.5** and earlier predate this feature and need one manual upgrade to **0.5.6** or later. See [automatic updates and first-release setup](docs/automatic-updates.md).
 
 <details>
   <summary>See the Setup tab</summary>
