@@ -19,6 +19,8 @@ release-metadata-arm64.json
 
 Intel builds use `x64` in place of `arm64`. Verify each architecture separately before describing it as tested. The local Apple Silicon test run does not verify the Intel app.
 
+Do not run Intel binaries under Rosetta on an Apple Silicon Mac, for example `arch -x86_64 release/qqdict.app/Contents/Resources/native/DictationBridge --self-test`. macOS attributes that to the enclosing qqdict bundle and shows **Support Ending for Intel-based Apps** for qqdict, even though the installed Apple Silicon app contains no Intel code. Run the Intel helper checks on an Intel Mac, or rely on the `macos-15-intel` job’s **Verify native helper** step. A local `QQDICT_ARCH=x64` build leaves `native/build/DictationBridge` and `release/qqdict.app` as Intel binaries. Afterwards, run `pnpm run build:native` and confirm `file node_modules/electron/dist/Electron.app/Contents/MacOS/Electron native/build/DictationBridge` reports `arm64` for both before running source builds or helper checks.
+
 ## Local signed and notarized release
 
 Install a **Developer ID Application** certificate with its matching private key in your Mac’s Keychain. A downloaded `.cer` alone is insufficient on another Mac: that Mac also needs the private key generated with the certificate signing request. Keep the key and authentication material out of the repository.

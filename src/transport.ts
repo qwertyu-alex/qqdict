@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import WebSocket from 'ws';
-import { CodexHarness } from './harness';
+import type { CodexAuth, CodexHarness } from './harness';
 import { TranscriptBuffer } from './transcripts';
 import { PRODUCT_NAME, PRODUCT_VERSION } from './product';
 
@@ -15,6 +15,8 @@ export const DICTATION_URL = 'wss://chatgpt.com/backend-api/dictation/stream?dic
 const SAMPLE_RATE = 24_000;
 const MAX_AUDIO_BYTES = SAMPLE_RATE * 2 * 300;
 const ENDPOINT_SILENCE_BYTES = SAMPLE_RATE * 2;
+
+class UnauthorizedError extends Error {}
 
 export function safeMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
@@ -58,10 +60,21 @@ export class DictationTransport {
     this.started = false;
     this.stopping = false;
     this.emit({ type: 'status', status: 'connecting' });
-    let auth;
-    try { auth = await this.harness.getAuth(); }
-    catch (error) { if (generation === this.generation) this.opening = false; throw error; }
-    if (generation !== this.generation) throw new Error('Recording cancelled.');
+    // Another Codex client can rotate the shared sign-in while this long-lived
+    // harness keeps the old token. Recover from HTTP 401 the way Codex does:
+    // reload the saved sign-in in a fresh harness, then ask Codex to refresh it.
+    for (const recovery of ['none', 'reload', 'refresh'] as const) {
+      if (recovery === 'reload') this.harness.dispose();
+      let auth;
+      try { auth = await this.harness.getAuth(recovery === 'refresh'); }
+      catch (error) { if (generation === this.generation) this.opening = false; throw error; }
+      if (generation !== this.generation) throw new Error('Recording cancelled.');
+      try { return await this.open(auth, generation, recovery !== 'refresh'); }
+      catch (error) { if (!(error instanceof UnauthorizedError) || generation !== this.generation) throw error; }
+    }
+  }
+
+  private open(auth: CodexAuth, generation: number, recoverUnauthorized: boolean): Promise<void> {
     const headers: Record<string, string> = {
       Authorization: `Bearer ${auth.token}`,
       originator: PRODUCT_NAME,
@@ -76,7 +89,7 @@ export class DictationTransport {
       headers, followRedirects: false, maxPayload: 8_388_608, handshakeTimeout: 15_000,
     });
     this.socket = ws;
-    await new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       let settled = false;
       this.startReject = reject;
       const active = () => this.socket === ws && generation === this.generation;
@@ -103,6 +116,16 @@ export class DictationTransport {
         response.resume();
         clearTimeout(startupTimer);
         const status = response.statusCode ?? 0;
+        if (status === 401 && recoverUnauthorized && active()) {
+          // Drop only this socket. The take stays open while start() retries.
+          settled = true;
+          this.startReject = null;
+          this.startupTimer = null;
+          this.socket = null;
+          ws.terminate();
+          reject(new UnauthorizedError('HTTP 401. Your existing Codex sign-in was not accepted.'));
+          return;
+        }
         const hint = status === 401 ? 'Your existing Codex sign-in was not accepted.'
           : status === 403 ? 'This account or independent client is not allowed to use this dictation route.'
           : status === 429 ? 'The subscription dictation service has reached a usage limit.'
