@@ -13,11 +13,16 @@
       <div class="text">
         <span id="pill-label" class="status" role="status" aria-live="polite" aria-atomic="true">Ready</span>
         <span id="pill-microphone" class="microphone" hidden></span>
+        <span id="pill-detail" class="microphone" hidden></span>
       </div>
       <span class="timer" id="pill-time" aria-label="Recording duration">0:00</span>
+      <button id="pill-retry" class="retry" type="button" hidden>Retry</button>
       <button id="pill-copy" class="copy" type="button" title="Copy last transcript" aria-label="Copy last transcript" disabled>
         <svg class="copy-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M15 8V4H4v11h4" /></svg>
         <svg class="check-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+      </button>
+      <button id="pill-dismiss" class="copy dismiss" type="button" title="Dismiss. The recording stays in the menu bar." aria-label="Dismiss. The recording stays in the menu bar." hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" /></svg>
       </button>
     </aside>
     <script type="module" src="/src/overlay.ts"></script>

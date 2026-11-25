@@ -166,9 +166,6 @@ type Take = {
   id: number;
   cancelled: boolean;
   stopRequested: boolean;
-  backendReady: boolean;
-  queue: ArrayBuffer[];
-  queuedBytes: number;
   audioBytes: number;
   captureStarted: boolean;
   context?: AudioContext;
@@ -186,12 +183,9 @@ let current: Take | undefined;
 function sendChunk(take: Take, audio: ArrayBuffer): void {
   if (take.cancelled || current !== take) return;
   take.audioBytes += audio.byteLength;
-  if (take.backendReady) api.sendAudio(audio, take.id);
-  else {
-    take.queue.push(audio);
-    take.queuedBytes += audio.byteLength;
-    if (take.queuedBytes > 2_097_152) void failTake(take, new Error('The dictation connection took too long. Try again.'));
-  }
+  // The main process saves every chunk to disk and buffers it until the
+  // dictation session is ready, so nothing said during the handshake is lost.
+  api.sendAudio(audio, take.id);
 }
 
 function stopMicrophone(take: Take): void {
@@ -222,8 +216,6 @@ async function releaseAudio(take: Take): Promise<void> {
 
 async function cancelTake(take: Take): Promise<void> {
   take.cancelled = true;
-  take.queue = [];
-  take.queuedBytes = 0;
   await releaseAudio(take);
   if (current === take) current = undefined;
   await api.cancel(take.id).catch(() => undefined);
@@ -285,18 +277,11 @@ async function prepareAudio(take: Take): Promise<void> {
 function startTake(id: number): void {
   if (current?.id === id || (current && !current.cancelled && !current.stopRequested)) return;
   const take: Take = {
-    id, cancelled: false, stopRequested: false, backendReady: false,
-    queue: [], queuedBytes: 0, audioBytes: 0, captureStarted: false,
+    id, cancelled: false, stopRequested: false, audioBytes: 0, captureStarted: false,
     connected: Promise.resolve(), prepared: Promise.resolve(),
   };
   current = take;
-  take.connected = api.start(id).then(() => {
-    if (take.cancelled || current !== take) return;
-    take.backendReady = true;
-    for (const audio of take.queue) api.sendAudio(audio, take.id);
-    take.queue = [];
-    take.queuedBytes = 0;
-  });
+  take.connected = api.start(id);
   take.prepared = prepareAudio(take);
   void take.connected.catch((error) => failTake(take, error));
   void take.prepared.catch((error) => failTake(take, error));

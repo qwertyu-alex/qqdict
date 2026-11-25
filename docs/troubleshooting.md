@@ -38,6 +38,10 @@ qqdict skips automatic paste if focus changes, the field is protected, or the ap
 
 ## The connection closes or reaches a limit
 
+Your words are not lost. qqdict saves each take’s audio while you speak. If the connection drops mid-take, the island shows **Listening · saved on Mac** and recording continues. When you release, the saved audio is transcribed in a fresh session (twice if needed) and pasted as usual.
+
+If it still can’t finish, the island stays on screen with the reason, the saved length, and **Retry**. Retry pastes at your cursor; clicking the island never moves focus away from your text field. After a temporary failure, such as a dropped connection, qqdict also retries by itself for about two minutes and shows the countdown. A usage limit or sign-in problem waits for you to retry. Click **×** or start a new take to move the recording to the menu bar: the icon gets a dot, and the take appears in **Recent** with its own **Retry**, which copies the transcript. Hover a recent transcript and click ↻ to transcribe it again from its saved audio, which helps when a transcript was cut short. Saved audio is deleted after 24 hours.
+
 Check your internet connection and retry a short take. The backend can reject an account, enforce a usage limit, or change its protocol. qqdict stops each take after five minutes and waits up to 30 seconds for a final result after release.
 
 ## The journal cannot be written

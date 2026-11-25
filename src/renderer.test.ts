@@ -96,7 +96,7 @@ async function recorderFixture(options: { delayMicrophone?: boolean; delayModule
   };
 }
 
-test('warms without a microphone and retains audio captured before the server is ready', async (t) => {
+test('warms without a microphone and hands audio to the main process before the server is ready', async (t) => {
   const fixture = await recorderFixture();
   t.after(() => fixture.unload());
   assert.equal(fixture.microphoneCalls, 0);
@@ -110,7 +110,8 @@ test('warms without a microphone and retains audio captured before the server is
   assert.deepEqual(fixture.microphones, ['MacBook Pro Microphone'], 'names the input that actually opened');
   fixture.processors[0]!.audio([1, 2]);
   fixture.processors[0]!.audio([3, 4]);
-  assert.equal(fixture.sent.length, 0);
+  // The main process saves each chunk to disk and buffers it for the handshake.
+  assert.deepEqual(fixture.sent.map(({ audio, id }) => [id, ...new Uint8Array(audio)]), [[1, 1, 2], [1, 3, 4]]);
 
   fixture.command('stop');
   assert.equal(fixture.track.readyState, 'ended', 'release closes the microphone before the handshake');
@@ -119,7 +120,7 @@ test('warms without a microphone and retains audio captured before the server is
   assert.equal(fixture.contexts[1]!.state, 'suspended', 'prepares a fresh graph for the next take');
   fixture.backend.resolve();
   await setImmediate();
-  assert.deepEqual(fixture.sent.map(({ audio, id }) => [id, ...new Uint8Array(audio)]), [[1, 1, 2], [1, 3, 4]]);
+  assert.equal(fixture.sent.length, 2);
   assert.deepEqual(fixture.stopped, [1]);
   assert.deepEqual(fixture.errors, []);
 });

@@ -1,7 +1,8 @@
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:transparent;color:#ececec;font-synthesis:none;-webkit-font-smoothing:antialiased}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;display:flex;justify-content:center;align-items:center;width:100vw;height:100vh;padding:16px;overflow:hidden;user-select:none}
-.pill{display:flex;align-items:center;gap:10px;width:280px;height:44px;padding:0 8px 0 14px;border:1px solid #3b3b3b;border-radius:24px;background:#252525;box-shadow:0 6px 16px #0003;animation:appear 180ms ease-out;cursor:grab;touch-action:none}
+.pill{transition:width .18s ease-out;display:flex;align-items:center;gap:10px;width:280px;height:44px;padding:0 8px 0 14px;border:1px solid #3b3b3b;border-radius:24px;background:#252525;box-shadow:0 6px 16px #0003;animation:appear 180ms ease-out;cursor:grab;touch-action:none}
 .pill[data-dragging="true"]{cursor:grabbing}
 .wave{display:flex;align-items:center;gap:2.5px;width:22px;height:18px;flex-shrink:0;color:#d3d3d3}
 .wave span{display:block;width:2.5px;height:4px;background:currentColor;border-radius:3px;transition:height 65ms linear;will-change:height}
@@ -17,6 +18,15 @@ body{margin:0;display:flex;justify-content:center;align-items:center;width:100vw
 .copy .check-icon{display:none}
 .copy[data-copied="true"] .copy-icon{display:none}
 .copy[data-copied="true"] .check-icon{display:block}
+.retry{flex-shrink:0;height:26px;margin:0;padding:0 11px;border:0;border-radius:13px;background:#3b3b3b;color:#fff;font:inherit;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background .15s}
+.retry:hover:not(:disabled){background:#4a4a4a}
+.retry:focus-visible{outline:2px solid #ddd;outline-offset:2px}
+.retry:disabled{opacity:.5;cursor:default}
+.dismiss{width:24px;height:24px;margin-left:-6px;color:#a7a7a7}
+.dismiss svg{width:13px;height:13px}
+.pill.attention{width:344px}
+.attention .status{color:#f0c36a}
+.attention .timer{display:none}
 .starting .wave,.transcribing .wave{animation:thinking 1s ease-in-out infinite}
 .starting .timer,.transcribing .timer,.error .timer{visibility:hidden}
 @keyframes appear{from{transform:translateY(6px);opacity:0}to{transform:translateY(0);opacity:1}}

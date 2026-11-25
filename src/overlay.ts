@@ -5,6 +5,10 @@ const label = document.getElementById('pill-label')!;
 const microphone = document.getElementById('pill-microphone')!;
 const time = document.getElementById('pill-time')!;
 const copy = document.getElementById('pill-copy') as HTMLButtonElement;
+const detailLine = document.getElementById('pill-detail')!;
+const retry = document.getElementById('pill-retry') as HTMLButtonElement;
+const dismiss = document.getElementById('pill-dismiss') as HTMLButtonElement;
+let countdown: ReturnType<typeof setInterval> | undefined;
 const wave = document.getElementById('wave')!;
 const bars = Array.from({ length: 5 }, () => {
   const bar = document.createElement('span');
@@ -30,10 +34,18 @@ function clearFeedback(): void {
   feedback = null;
 }
 
+/** A failed take is shown on the island only between takes. */
+function heldTake(state: AppState) {
+  return state.attention && state.phase !== 'starting' && state.phase !== 'recording' && state.phase !== 'transcribing' ? state.attention : null;
+}
+
 function statusText(state: AppState): string {
+  const held = heldTake(state);
+  if (held) return held.retrying ? 'Transcribing saved audio' : held.title;
   if (state.phase === 'starting') return 'Getting ready';
-  if (state.phase === 'recording') return 'Listening';
-  if (state.phase === 'transcribing') return 'Transcribing';
+  const offline = state.detail.startsWith('Connection lost');
+  if (state.phase === 'recording') return offline ? 'Listening · saved on Mac' : 'Listening';
+  if (state.phase === 'transcribing') return !offline ? 'Transcribing' : state.detail.includes('(retry') ? 'Retrying saved audio' : 'Transcribing saved audio';
   if (state.phase === 'error') return 'Couldn’t finish';
   if (state.detail === 'Cancelled') return 'Cancelled';
   if (state.detail === 'No speech detected.') return 'No speech detected';
@@ -48,10 +60,22 @@ function render(state: AppState): void {
   if (nextContext !== context) clearFeedback();
   context = nextContext;
   currentState = state;
-  pill.className = `pill ${state.phase}`;
+  const held = heldTake(state);
+  pill.className = `pill ${state.phase}${held ? ' attention' : ''}`;
   const text = feedback === 'copied' ? 'Copied' : feedback === 'failed' ? 'Couldn’t copy' : statusText(state);
   label.textContent = text;
-  const description = feedback === 'failed' ? 'Try copying again.' : state.detail;
+  const retryIn = held?.retryAt ? Math.max(1, Math.ceil((held.retryAt - Date.now()) / 1000)) : 0;
+  const heldDetail = held && !held.retrying ? `${held.detail}${retryIn ? ` · retrying in ${retryIn}s` : ''}` : '';
+  detailLine.hidden = !heldDetail;
+  detailLine.textContent = heldDetail;
+  retry.hidden = !held;
+  dismiss.hidden = !held || held.retrying;
+  retry.disabled = !!held?.retrying;
+  retry.textContent = held?.retrying ? 'Retrying…' : 'Retry';
+  retry.setAttribute('aria-label', held?.retrying ? 'Transcribing the saved recording' : 'Transcribe the saved recording and paste it at your cursor');
+  clearInterval(countdown);
+  countdown = held?.retryAt ? setInterval(() => { if (currentState) render(currentState); }, 1000) : undefined;
+  const description = feedback === 'failed' ? 'Try copying again.' : held ? `${held.title}. ${heldDetail}` : state.detail;
   pill.title = description;
   // Name the input only while it is open; the recorder reports what macOS actually opened.
   const microphoneName = state.phase === 'recording' ? state.microphoneName : '';
@@ -148,6 +172,14 @@ copy.addEventListener('click', async () => {
     if (currentState) render(currentState);
   }, 1500);
 });
+
+retry.addEventListener('click', () => {
+  if (retry.disabled) return;
+  retry.disabled = true;
+  // Main publishes the retrying and final states; a failure returns to Retry.
+  void window.dictation.retryAttention().catch(() => {}).finally(() => { if (currentState) render(currentState); });
+});
+dismiss.addEventListener('click', () => window.dictation.dismissAttention());
 
 pill.addEventListener('mouseenter', () => { hovered = true; window.dictation.holdOverlay(true); });
 pill.addEventListener('mouseleave', () => { hovered = false; window.dictation.holdOverlay(drag !== null); });

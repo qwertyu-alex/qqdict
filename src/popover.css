@@ -35,6 +35,17 @@ h2 { margin: 0 0 3px; color: #9f9f9f; font-size: 10px; font-weight: 500; }
 .copy-button[data-copied="true"] { color: #ececec; }
 .transcript-text { margin: 0; font-size: 13px; line-height: 1.6; letter-spacing: -.1px; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; }
 .transcript-warning { color: #bcbcbc; font-size: 10px; line-height: 1.5; margin: 8px 0 0; }
+.recording-row .transcript-text { color: #f0c36a; }
+.recording-reason { margin: 3px 0 0; color: #9f9f9f; font-size: 10px; line-height: 1.5; overflow-wrap: anywhere; }
+.retry-button { flex-shrink: 0; height: 24px; padding: 0 10px; border: 1px solid #454545; border-radius: 6px; background: #2b2b2b; color: #ececec; font-size: 11px; }
+.retry-button:hover:not(:disabled) { background: #353535; }
+.retry-button:disabled { color: #9f9f9f; cursor: default; }
+/* Transcribing again is a secondary action: show it on hover or keyboard focus. */
+.transcript-row .redo-button { opacity: 0; transition: opacity .12s; }
+.transcript-row:hover .redo-button, .redo-button:focus-visible, .redo-button[aria-busy="true"] { opacity: 1; }
+.row-actions { display: flex; align-items: center; gap: 2px; }
+.row-actions .icon-button[aria-busy="true"] svg { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 .actionbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 15px 10px 19px; border-top: 1px solid #353535; flex-shrink: 0; }
 .shortcut { display: flex; align-items: center; gap: 8px; color: #9f9f9f; font-size: 11px; }
 .shortcut svg { width: 14px; height: 14px; }

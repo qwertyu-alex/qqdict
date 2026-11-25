@@ -52,6 +52,7 @@ Production builds with the automatic updater check for new stable releases and d
 - **Paste where you write:** qqdict inserts into the originally focused field. If focus changes or the field is protected, your transcript stays available to copy.
 - **Automatic spacing:** dictated text gets a trailing space. In editors that expose cursor context, qqdict reuses existing spaces and attaches punctuation to the preceding word.
 - **Recent transcripts:** click the menu bar icon to recover and copy your last 10 dictations.
+- **Never lose a take:** audio is saved on your Mac while you speak. If the connection drops, keep talking; on release the saved audio is transcribed and pasted as usual. If it still can’t finish, the island stays up with **Retry**, which pastes at your cursor, and retries by itself for about two minutes when the failure looks temporary. Dismissed takes wait in the menu bar’s Recent list, marked by a dot on the icon.
 - **Floating island:** shows recording and transcription status, with one-click copy of the latest transcript. Drag it to any corner or the center of any screen edge; it remembers the position.
 - **Markdown journal:** every completed transcript is appended with a timestamp to `~/Dictation/YYYY-MM.md`.
 - **Your preferences:** choose a microphone and optionally open qqdict at login.
@@ -60,7 +61,9 @@ Recording stops on release and is limited to five minutes per take. The menu bar
 
 ## What is sent and saved
 
-Audio is streamed to the ChatGPT dictation service through your existing Codex authentication. This is **cloud transcription**, so it requires internet access. qqdict does not save audio files or store your Codex credential in its settings or transcript journal.
+Audio is streamed to the ChatGPT dictation service through your existing Codex authentication. This is **cloud transcription**, so it requires internet access. qqdict does not store your Codex credential in its settings or transcript journal.
+
+So that a failed transcription can be retried, each take’s audio is also saved as a WAV file in `~/Library/Application Support/qqdict/recordings/`, readable only by your user account. Recordings are deleted automatically 24 hours after they were made. Retrying sends the saved audio to the same dictation service again.
 
 Transcripts are saved as plain text in `~/Dictation/` and in the app’s local recent-history cache. Treat the journal like any other document containing what you dictated. The app does not add analytics or a separate account service.
 

@@ -9,6 +9,24 @@ export type TranscriptEntry = {
   error?: string;
   logError?: string;
 };
+export type RecordingStatus = 'recording' | 'failed' | 'transcribed' | 'retrying';
+export type RecordingEntry = {
+  id: string;
+  startedAt: string;
+  durationSeconds: number;
+  status: RecordingStatus;
+  error?: string;
+  transcriptId?: string;
+};
+/** A take that could not be transcribed and is waiting on the island for Retry or dismissal. */
+export type Attention = {
+  recordingId: string;
+  title: string;
+  detail: string;
+  retrying: boolean;
+  /** Epoch milliseconds of the next automatic retry, when one is scheduled. */
+  retryAt?: number;
+};
 export type Settings = { hotkey: Hotkey; microphoneId: string; launchAtLogin: boolean };
 export type AppState = {
   phase: Phase;
@@ -21,6 +39,9 @@ export type AppState = {
   launchAtLogin: boolean;
   permissions: { microphone: Permission; accessibility: Permission; inputMonitoring: Permission };
   history: TranscriptEntry[];
+  /** Saved audio from the last 24 hours that can be transcribed again. */
+  recordings: RecordingEntry[];
+  attention: Attention | null;
   logDirectory: string;
   level: number;
   elapsedSeconds: number;
@@ -40,6 +61,11 @@ export interface DictationAPI {
   begin(): Promise<void>;
   end(): Promise<void>;
   copyTranscript(id: string): Promise<void>;
+  /** Transcribe saved audio again and copy the result. */
+  retryRecording(id: string): Promise<void>;
+  /** Retry the island's failed take and paste at the current cursor. */
+  retryAttention(): Promise<void>;
+  dismissAttention(): void;
   holdOverlay(held: boolean): void;
   beginOverlayDrag(): void;
   moveOverlayDrag(): void;
